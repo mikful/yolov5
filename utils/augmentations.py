@@ -19,18 +19,22 @@ class Albumentations:
             import albumentations as A
             check_version(A.__version__, '1.0.3')  # version requirement
 
+            # choose presize and resize dims
+            presize = 512
+            im_size = 384
+
             self.transform = A.Compose([
-                A.SmallestMaxSize(max_size=512),
+                A.SmallestMaxSize(max_size=presize),
                 A.HorizontalFlip(p=0.5),
                 A.ShiftScaleRotate(p=0.5, shift_limit=0.0625, scale_limit=0.1, rotate_limit=15),
                 A.RGBShift(p=0.5, r_shift_limit=10, g_shift_limit=10, b_shift_limit=10),
                 A.RandomBrightnessContrast(p=0.5, brightness_limit=0.2, contrast_limit=0.2),
                 A.Blur(p=0.5, blur_limit=(1, 3)),
                 A.OneOrOther(
-                    A.RandomSizedBBoxSafeCrop(p=1.0, height=384, width=384),
-                    A.LongestMaxSize(p=1.0, max_size=384),
+                    A.RandomSizedBBoxSafeCrop(p=1.0, height=im_size, width=im_size),
+                    A.LongestMaxSize(p=1.0, max_size=im_size),
                     p=0.5),
-                A.PadIfNeeded(p=1.0, min_height=384, min_width=384, border_mode=0, value=[124, 116, 104])],
+                A.PadIfNeeded(p=1.0, min_height=im_size, min_width=im_size, border_mode=0, value=[124, 116, 104])],
                 bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
 
