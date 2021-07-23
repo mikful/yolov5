@@ -20,10 +20,20 @@ class Albumentations:
             check_version(A.__version__, '1.0.3')  # version requirement
 
             self.transform = A.Compose([
-                A.Blur(p=0.1),
-                A.MedianBlur(p=0.1),
-                A.ToGray(p=0.01)],
+                A.SmallestMaxSize(always_apply=False, p=1, max_size=512, interpolation=1),
+                A.HorizontalFlip(always_apply=False, p=0.5),
+                A.ShiftScaleRotate(always_apply=False, p=0.5, shift_limit_x=(-0.0625, 0.0625), shift_limit_y=(-0.0625, 0.0625), 
+                scale_limit=(-0.09999999999999998, 0.10000000000000009), rotate_limit=(-15, 15), interpolation=1, border_mode=4, value=None, mask_value=None),
+                A.RGBShift(always_apply=False, p=0.5, r_shift_limit=(-10, 10), g_shift_limit=(-10, 10), b_shift_limit=(-10, 10)),
+                A.RandomBrightnessContrast(always_apply=False, p=0.5, brightness_limit=(-0.2, 0.2), contrast_limit=(-0.2, 0.2), brightness_by_max=True),
+                A.Blur(always_apply=False, p=0.5, blur_limit=(1, 3)),
+                A.OneOrOther(
+                    A.RandomSizedBBoxSafeCrop(p=1, height=384, width=384, erosion_rate=0.0, interpolation=1),
+                    A.LongestMaxSize(p=1, max_size=384, interpolation=1),
+                    p=0.5),
+                A.PadIfNeeded(always_apply=False, p=1.0, min_height=384, min_width=384, pad_height_divisor=None, pad_width_divisor=None, border_mode=0, value=[124, 116, 104], mask_value=None)],
                 bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
+
 
             logging.info(colorstr('albumentations: ') + ', '.join(f'{x}' for x in self.transform.transforms if x.p))
         except ImportError:  # package not installed, skip
